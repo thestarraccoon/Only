@@ -23,9 +23,9 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Email обязателен для заполнения',
-            'email.email' => 'Введите корректный email',
-            'password.required' => 'Пароль обязателен для заполнения',
+            'email.required' => __('auth.email.required'),
+            'email.email' => __('auth.email.email'),
+            'password.required' => __('auth.password.required'),
         ];
     }
 }

@@ -18,7 +18,7 @@ class AvailableCarsController extends Controller
 
     public function __invoke(AvailableCarsRequest $request): JsonResponse
     {
-        $dto = AvailableCarsDto::fromArray($request->validated());
+        $dto = AvailableCarsDto::fromRequest($request);
 
         $cars = $this->availableCarsService->getAvailableCarsForUser(
             $request->user(),

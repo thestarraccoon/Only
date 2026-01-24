@@ -13,8 +13,31 @@ return [
     |
     */
 
-    'failed' => 'These credentials do not match our records.',
-    'password' => 'The provided password is incorrect.',
+    'failed' => 'Login failed. Please check login credentials.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
 
+    'success' => 'Login success.',
+    'logout_success' => 'You have been logged out.',
+    'register_success' => 'You have been registered.',
+
+    'email' => [
+        'required' => 'Email is required.',
+        'email' => 'Enter a valid email address.',
+        'unique' => 'A user with this email already exists',
+    ],
+
+    'password' => [
+        'required' => 'Password is required.',
+        'password' => 'The provided password is incorrect.',
+        'confirmed' => 'Passwords do not match',
+    ],
+
+    'name' => [
+        'required' => 'Name is required',
+    ],
+
+    'position_id' => [
+        'required' => 'Position is required',
+        'exists' => 'The specified position does not exist',
+    ],
 ];

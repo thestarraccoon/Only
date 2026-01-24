@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use Carbon\Carbon;
+use Illuminate\Foundation\Http\FormRequest;
 
 class AvailableCarsDto
 {
@@ -22,5 +23,10 @@ class AvailableCarsDto
             carModelId: $data['car_model_id'] ?? null,
             comfortCategoryId: $data['comfort_category_id'] ?? null,
         );
+    }
+
+    public static function fromRequest(FormRequest $request): self
+    {
+        return self::fromArray($request->validated());
     }
 }

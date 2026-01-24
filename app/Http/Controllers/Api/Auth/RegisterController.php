@@ -22,7 +22,7 @@ class RegisterController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Регистрация прошла успешно',
+            'message' => __('auth.register_success'),
             'data' => [
                 'user' => [
                     'id' => $user->id,
