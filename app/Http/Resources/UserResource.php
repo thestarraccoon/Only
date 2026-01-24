@@ -13,6 +13,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'roles' => $this->getRoleNames(),
             'position' => $this->when($this->relationLoaded('position'), function () {
                 return [
                     'id' => $this->position?->id,

@@ -29,7 +29,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', LoginController::class)->name('api.auth.login');
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'corporate.role'])->group(function () {
     Route::prefix('auth')->group(function () {
         Route::get('/me', MeController::class)->name('api.auth.me');
         Route::post('/logout', LogoutController::class)->name('api.auth.logout');

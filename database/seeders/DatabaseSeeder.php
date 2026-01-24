@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\BookingStatus;
+use App\Enums\RoleConfig;
 use App\Models\Car;
 use App\Models\CarModel;
 use App\Models\ComfortCategory;
@@ -25,6 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->createDrivers();
         $this->createCars();
         $this->createUsers();
+        $this->createSpatieRoles();
     }
 
     private function createComfortCategories(): void
@@ -118,14 +120,29 @@ class DatabaseSeeder extends Seeder
             [2, 3, 2023, 'Темно-синий', false], // Camry #2 -> Алексей Смирнов (driver 3=id4, неактивна)
             [2, 4, 2021, 'Серебристый', true], // Camry #3 -> Михаил Кузнецов (driver 4=id5)
 
-            // Renault Logan (model 1=id2) — 1 экземпляр
-            [1, 3, 2021, 'Красный', true],     // Logan -> Алексей Смирнов (driver 3=id4)
+            // Renault Logan (model 1=id2) — 2 экземпляра
+            [1, 3, 2021, 'Красный', true],     // Logan #1 -> Алексей Смирнов (driver 3=id4)
+            [1, 0, 2022, 'Синий', true],       // Logan #2 -> Иван Петров (driver 0=id1)
 
-            // Kia Sportage (model 4=id5) — 1 экземпляр
-            [4, 2, 2023, 'Зеленый', false],    // Sportage -> Дмитрий Иванов (driver 2=id3, неактивна)
+            // Kia Sportage (model 4=id5) — 2 экземпляра
+            [4, 2, 2023, 'Зеленый', false],    // Sportage #1 -> Дмитрий Иванов (driver 2=id3, неактивна)
+            [4, 1, 2024, 'Черный', true],      // Sportage #2 -> Сергей Сидоров (driver 1=id2)
 
-            // Lada Aura (model 5=id6) — 1 экземпляр
-            [5, 4, 2024, 'Бежевый', true],     // Aura -> Михаил Кузнецов (driver 4=id5)
+            // Lada Aura (model 5=id6) — 2 экземпляра
+            [5, 4, 2024, 'Бежевый', true],     // Aura #1 -> Михаил Кузнецов (driver 4=id5)
+            [5, 3, 2023, 'Серый', true],       // Aura #2 -> Алексей Смирнов (driver 3=id4)
+
+            // Lada Iskra (model 6=id7) — 2 экземпляра ✅ НОВОЕ!
+            [6, 2, 2024, 'Красный', true],     // Iskra #1 -> Дмитрий Иванов (driver 2=id3)
+            [6, 0, 2023, 'Белый', true],       // Iskra #2 -> Иван Петров (driver 0=id1)
+
+            // Changan Uni-V (model 7=id8) — 2 экземпляра ✅ НОВОЕ!
+            [7, 1, 2024, 'Серебристый', true], // Uni-V #1 -> Сергей Сидоров (driver 1=id2)
+            [7, 4, 2023, 'Черный', false],     // Uni-V #2 -> Михаил Кузнецов (driver 4=id5, неактивна)
+
+            // Omoda C5 (model 8=id9) — 2 экземпляра ✅ НОВОЕ!
+            [8, 3, 2024, 'Оранжевый', true],   // C5 #1 -> Алексей Смирнов (driver 3=id4)
+            [8, 2, 2023, 'Синий', true],       // C5 #2 -> Дмитрий Иванов (driver 2=id3)
         ];
 
         $cars = [];
@@ -187,6 +204,16 @@ class DatabaseSeeder extends Seeder
 
         foreach ($users as $user) {
             User::create($user);
+        }
+    }
+
+    private function createSpatieRoles(): void
+    {
+        foreach (RoleConfig::cases() as $role) {
+            app()[\Spatie\Permission\Models\Role::class]->create([
+                'name' => $role->value,
+                'guard_name' => 'api'
+            ]);
         }
     }
 }

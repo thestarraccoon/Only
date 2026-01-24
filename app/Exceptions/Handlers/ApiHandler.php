@@ -2,6 +2,7 @@
 
 namespace App\Exceptions\Handlers;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
@@ -23,8 +24,19 @@ class ApiHandler
             $e instanceof NotFoundHttpException => $this->notFound($requestId),
             $e instanceof AuthenticationException => $this->unauthorized($requestId),
             $e instanceof ValidationException => $this->validationError($e, $requestId),
+            $e instanceof AuthorizationException => $this->forbidden($requestId),
             default => $this->serverError($requestId)
         };
+    }
+
+    private function forbidden(string $requestId): JsonResponse
+    {
+        return $this->errorResponse(
+            code: 'ACCESS_FORBIDDEN',
+            message: __('api/errors.access_forbidden'),
+            status: 403,
+            requestId: $requestId
+        );
     }
 
     private function unauthorized(string $requestId): JsonResponse

@@ -35,9 +35,4 @@ return [
     'name' => [
         'required' => 'Name is required',
     ],
-
-    'position_id' => [
-        'required' => 'Position is required',
-        'exists' => 'The specified position does not exist',
-    ],
 ];
