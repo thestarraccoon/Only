@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,16 @@ class Booking extends Model
         'start_at' => 'datetime',
         'end_at' => 'datetime',
     ];
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', '!=', BookingStatus::CANCELLED);
+    }
+
+    public function scopeOverlaps($query, $timeOverlap)
+    {
+        return $query->where($timeOverlap);
+    }
 
     public function car(): BelongsTo
     {

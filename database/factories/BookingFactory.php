@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Booking;
 use App\Models\Car;
@@ -17,12 +18,12 @@ class BookingFactory extends Factory
         $endAt = (clone $startAt)->modify('+' . fake()->numberBetween(2, 8) . ' hours');
 
         return [
-            'car_id' => Car::factory(),
-            'user_id' => User::factory(),
+            'car_id' => Car::inRandomOrder()->first()->id,
+            'user_id' => User::inRandomOrder()->first()->id,
             'start_at' => $startAt,
             'end_at' => $endAt,
             'destination' => fake()->city(),
-            'status' => fake()->randomElement(['pending', 'confirmed', 'cancelled', 'completed']),
+            'status' => fake()->randomElement(BookingStatus::cases())->value,
         ];
     }
 }
