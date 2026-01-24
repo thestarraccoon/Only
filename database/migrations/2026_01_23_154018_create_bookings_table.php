@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\BookingStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,7 +16,8 @@ return new class extends Migration
             $table->dateTime('start_at');
             $table->dateTime('end_at');
             $table->string('destination')->nullable();
-            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('confirmed');
+            $table->enum('status', array_column(BookingStatus::cases(), 'value'))
+                ->default(BookingStatus::CONFIRMED->value);
             $table->timestamps();
 
             $table->index(['car_id', 'start_at', 'end_at']);

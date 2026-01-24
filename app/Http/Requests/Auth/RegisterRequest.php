@@ -18,20 +18,19 @@ class RegisterRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
-            'position_id' => ['required', 'integer', 'exists:positions,id'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Имя обязательно для заполнения',
-            'email.required' => 'Email обязателен для заполнения',
-            'email.unique' => 'Пользователь с таким email уже существует',
-            'password.required' => 'Пароль обязателен для заполнения',
-            'password.confirmed' => 'Пароли не совпадают',
-            'position_id.required' => 'Должность обязательна для заполнения',
-            'position_id.exists' => 'Указанная должность не существует',
+            'name.required' => __('auth.name.required'),
+            'email.required' => __('auth.email.required'),
+            'email.unique' => __('auth.email.unique'),
+            'password.required' => __('auth.password.required'),
+            'password.confirmed' => __('auth.password.confirmed'),
+            'position_id.required' => __('auth.position_id.required'),
+            'position_id.exists' => __('auth.position_id.exists'),
         ];
     }
 }

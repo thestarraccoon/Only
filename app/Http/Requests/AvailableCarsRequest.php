@@ -25,11 +25,11 @@ class AvailableCarsRequest extends FormRequest
     {
         return [
             'start_at.required' => __('validation.start_at.required'),
-            'start_at.after_or_equal' => __('start_at.after_or_equal'),
+            'start_at.after_or_equal' => __('validation.start_at.after_or_equal'),
             'end_at.required' => __('validation.end_at.required'),
-            'end_at.after' => __('end_at.after'),
-            'car_model_id.exists' => __('car_model_id.exists'),
-            'comfort_category_id.exists' => __('comfort_category_id.exists'),
+            'end_at.after' => __('validation.end_at.after'),
+            'car_model_id.exists' => __('validation.car_model_id.exists'),
+            'comfort_category_id.exists' => __('validation.comfort_category_id.exists'),
         ];
     }
 }

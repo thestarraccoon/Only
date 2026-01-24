@@ -17,11 +17,10 @@ class LoginController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['Неверные учетные данные'],
+                'email' => [__('auth.failed')],
             ]);
         }
 
-        // Удаляем старые токены (опционально, для безопасности)
         if ($request->revoke_other_tokens) {
             $user->tokens()->delete();
         }
@@ -29,7 +28,7 @@ class LoginController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Авторизация прошла успешно',
+            'message' => __('auth.success'),
             'data' => [
                 'user' => [
                     'id' => $user->id,

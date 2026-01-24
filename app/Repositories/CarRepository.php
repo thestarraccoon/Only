@@ -32,10 +32,10 @@ class CarRepository
                 $query->whereIn('comfort_category_id', $allowedComfortCategoryIds);
             })
             ->whereDoesntHave('bookings', function ($q) use ($timeOverlap) {
-                $q->where('status', '!=', 'cancelled')->where($timeOverlap);
+                $q->active()->overlaps($timeOverlap);
             })
             ->whereDoesntHave('driver.cars.bookings', function ($q) use ($timeOverlap) {
-                $q->where('status', '!=', 'cancelled')->where($timeOverlap);
+                $q->active()->overlaps($timeOverlap);
             });
 
         if ($dto->carModelId) {

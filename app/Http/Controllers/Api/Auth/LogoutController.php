@@ -10,11 +10,10 @@ class LogoutController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
-        // Удаляем текущий токен
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => 'Вы успешно вышли из системы',
+            'message' => __('logout.success'),
         ]);
     }
 }
