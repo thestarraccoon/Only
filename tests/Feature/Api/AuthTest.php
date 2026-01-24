@@ -5,6 +5,7 @@ namespace Tests\Feature\Api;
 use App\Enums\RoleConfig;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -14,6 +15,8 @@ class AuthTest extends TestCase
     /** @test Регистрация Директора */
     public function test_register_director(): void
     {
+        $this->seed();
+
         $response = $this->withHeaders(['X-Corporate-ID' => 'corp-dir-001'])
             ->postJson('/api/auth/register', [
                 'name' => 'Иван Директор',
@@ -66,11 +69,16 @@ class AuthTest extends TestCase
     /** @test Валидация email unique */
     public function test_register_email_already_exists(): void
     {
-        User::factory()->create(['email' => 'test@test.com']);
+        User::create([
+            'name' => 'Существующий',
+            'email' => 'testauth@test.com',
+            'password' => Hash::make('123qweasd'),
+            'position_id' => 1
+        ]);
 
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Иван',
-            'email' => 'test@test.com',
+            'email' => 'testauth@test.com',
             'password' => '123qweasd',
             'password_confirmation' => '123qweasd'
         ]);
@@ -109,7 +117,7 @@ class AuthTest extends TestCase
             $response = $this->withHeaders(['X-Corporate-ID' => $corporateId])
                 ->postJson('/api/auth/register', [
                     'name' => $role->value,
-                    'email' => $role->value . '@test.com',
+                    'email' => $role->value . 'all_roles' . '@test.com',
                     'password' => '123qweasd',
                     'password_confirmation' => '123qweasd'
                 ]);
