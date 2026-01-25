@@ -181,30 +181,23 @@ class DatabaseSeeder extends Seeder
         $positions = Position::pluck('id', 'name')->toArray();
         $testPassword = Hash::make('123qweasd');
 
-        $users = [
-            [
-                'name' => 'Директор Тестовый',
-                'email' => 'director@example.com',
-                'password' => $testPassword,
-                'position_id' => $positions['Руководство']
-            ],
-            [
-                'name' => 'Менеджер Тестовый',
-                'email' => 'manager@example.com',
-                'password' => $testPassword,
-                'position_id' => $positions['Топ-менеджмент']
-            ],
-            [
-                'name' => 'Специалист Тестовый',
-                'email' => 'specialist@example.com',
-                'password' => $testPassword,
-                'position_id' => $positions['Рядовой специалист']
-            ],
-        ];
+        User::factory()->create([
+            'name' => 'Директор Тестовый',
+            'password' => $testPassword,
+            'position_id' => $positions['Руководство']
+        ]);
 
-        foreach ($users as $user) {
-            User::create($user);
-        }
+        User::factory()->create([
+            'name' => 'Менеджер Тестовый',
+            'password' => $testPassword,
+            'position_id' => $positions['Топ-менеджмент']
+        ]);
+
+        User::factory()->create([
+            'name' => 'Специалист Тестовый',
+            'password' => $testPassword,
+            'position_id' => $positions['Рядовой специалист']
+        ]);
     }
 
     private function createSpatieRoles(): void

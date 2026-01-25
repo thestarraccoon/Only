@@ -10,6 +10,8 @@ use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
+    use RefreshDatabase;
+
     /** @test Регистрация Директора */
     public function test_register_director(): void
     {
