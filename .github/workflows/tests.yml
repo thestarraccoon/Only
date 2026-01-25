@@ -1,12 +1,14 @@
-
-## 🔧 Обнови `tests.yml` для **PHP 8.1 + Laravel 10**:
-
-  ```yaml
 name: Tests & Coverage
-on: [push, pull_request, workflow_dispatch]
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
