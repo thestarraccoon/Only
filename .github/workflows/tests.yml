@@ -136,6 +136,9 @@ jobs:
           DB_DATABASE: only_tests
           DB_USERNAME: root
           DB_PASSWORD: root
+          APP_DEBUG: true
+          LOG_LEVEL: debug
+          LOG_CHANNEL: stderr
         run: php artisan test --coverage-clover coverage.xml
 
       - name: 📊 Upload coverage
