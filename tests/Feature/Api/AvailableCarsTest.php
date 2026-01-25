@@ -11,8 +11,6 @@ use Tests\TestCase;
 
 class AvailableCarsTest extends TestCase
 {
-    use RefreshDatabase;
-
     /** Helper для будущих дат */
     private function futureDateRange(): array
     {

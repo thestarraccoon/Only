@@ -9,8 +9,6 @@ use Tests\TestCase;
 
 class IntegrationTest extends TestCase
 {
-    use RefreshDatabase;
-
     /** Helper для будущих дат */
     private function futureDateRange(): array
     {

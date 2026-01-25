@@ -8,8 +8,6 @@ use Tests\TestCase;
 
 class MiddlewareTest extends TestCase
 {
-    use RefreshDatabase;
-
     /** @test Middleware требует X-Corporate-ID */
     public function test_corporate_role_middleware_requires_header(): void
     {
