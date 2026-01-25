@@ -53,7 +53,7 @@ jobs:
       - name: Setup .env
         run: |
           cp .env.example .env
-          echo "DB_DATABASE=testing" >> .env
+          echo "DB_DATABASE=only_tests" >> .env
           echo "DB_USERNAME=root" >> .env
           echo "DB_PASSWORD=" >> .env
           echo "DB_HOST=127.0.0.1" >> .env
