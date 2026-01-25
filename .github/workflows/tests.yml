@@ -1,5 +1,4 @@
 name: Tests & Coverage
-
 on:
   push:
   pull_request:
@@ -8,15 +7,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     services:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: laravel_test
-        ports:
-          - 3306:3306
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: testing
         options: >-
           --health-cmd "mysqladmin ping"
           --health-interval 10s
@@ -33,6 +29,27 @@ jobs:
           extensions: mysql
           coverage: xdebug
 
+      - name: Copy .env
+        run: |
+          cat > .env << EOF
+          APP_NAME="Laravel"
+          APP_ENV=testing
+          APP_KEY=base64:VGhpc0lzTXlBcHBLaWV5Rm9yVGVzdGluZw==
+          APP_DEBUG=true
+          APP_URL=http://localhost
+
+          DB_CONNECTION=mysql
+          DB_HOST=127.0.0.1
+          DB_PORT=3306
+          DB_DATABASE=testing
+          DB_USERNAME=root
+          DB_PASSWORD=
+
+          CACHE_DRIVER=array
+          SESSION_DRIVER=array
+          QUEUE_CONNECTION=sync
+          EOF
+
       - name: Cache Composer
         uses: actions/cache@v4
         with:
@@ -40,39 +57,18 @@ jobs:
           key: composer-${{ hashFiles('**/composer.lock') }}
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+        run: composer install --prefer-dist --no-progress --no-dev
 
-      - name: Copy .env
-        run: |
-          cat > .env << EOF
-          APP_NAME=Laravel
-          APP_ENV=testing
-          APP_KEY=base64:${{ secrets.APP_KEY || 'somerandom32charslongstringforlaraveltesting==' }}
-          APP_DEBUG=true
-          APP_URL=http://localhost
+      - name: Generate app key
+        run: php artisan key:generate --force
 
-          DB_CONNECTION=mysql
-          DB_HOST=127.0.0.1
-          DB_PORT=3306
-          DB_DATABASE=laravel_test
-          DB_USERNAME=root
-          DB_PASSWORD=root
+      - name: Run migrations
+        run: php artisan migrate --database=mysql
 
-          CACHE_DRIVER=array
-          SESSION_DRIVER=array
-          QUEUE_CONNECTION=sync
-          EOF
-
-      - name: Generate key
-        run: php artisan key:generate
-
-      - name: Run migrations & seed
-        run: php artisan migrate --seed
-
-      - name: Run tests with coverage
-        run: ./vendor/bin/phpunit --coverage-clover coverage.xml
+      - name: Run tests
+        run: php artisan test --coverage-clover coverage.xml
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
-          files: ./coverage.xml
+          file: ./coverage.xml
