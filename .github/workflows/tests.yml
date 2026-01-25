@@ -63,7 +63,7 @@ jobs:
 
       - name: Setup .env
         run: |
-          cat > .env << EOF
+          cat > .env << 'ENVEOF'
           APP_NAME=Laravel
           APP_ENV=testing
           APP_KEY=base64:dGVzdGluZ2tleWZvcmdpdGh1Ymxhc2g3Mw==
@@ -80,27 +80,65 @@ jobs:
           CACHE_DRIVER=array
           SESSION_DRIVER=array
           QUEUE_CONNECTION=sync
-          EOF
+          ENVEOF
           php artisan key:generate --force --no-interaction
 
       - name: Clear config cache
-        run: php artisan config:clear
+        run: php artisan config:clear --no-interaction
 
-      - name: Run migrations
+      - name: 🗄️ Run ALL migrations from database/migrations/
         env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
           DB_DATABASE: only_tests
           DB_USERNAME: root
           DB_PASSWORD: root
-        run: php artisan migrate:fresh --seed --force
+        run: |
+          echo "🗄️  Running ALL migrations..."
+          php artisan migrate:fresh --force
+          echo "✅ Migrations completed!"
 
-      - name: Run tests
+      - name: 🌱 Run ALL seeders from database/seeders/
         env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: only_tests
+          DB_USERNAME: root
+          DB_PASSWORD: root
+        run: |
+          echo "🌱 Running DatabaseSeeder + all seeders..."
+          php artisan db:seed --force
+          echo "✅ Seeders completed!"
+
+      - name: 🔍 Verify database structure
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: only_tests
+          DB_USERNAME: root
+          DB_PASSWORD: root
+        run: |
+          echo "📋 Tables created:"
+          php artisan tinker --execute="print_r(array_column(DB::select('SHOW TABLES'), 'Tables_in_only_tests'));"
+          echo "📊 Positions count:"
+          php artisan tinker --execute="echo DB::table('positions')->count();"
+          echo "🚗 Cars count:"
+          php artisan tinker --execute="echo DB::table('cars')->count();"
+
+      - name: 🧪 Run tests with coverage
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
           DB_DATABASE: only_tests
           DB_USERNAME: root
           DB_PASSWORD: root
         run: php artisan test --coverage-clover coverage.xml
 
-      - name: Upload coverage
+      - name: 📊 Upload coverage
         if: always()
         uses: codecov/codecov-action@v4
         with:
