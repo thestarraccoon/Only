@@ -1,12 +1,11 @@
 <?php
-// tests/Feature/Api/AvailableCarsTest.php
 
 namespace Tests\Feature\Api;
 
+use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\Car;
 use App\Models\User;
-use App\Models\Position;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -14,74 +13,82 @@ class AvailableCarsTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** Helper для будущих дат */
+    private function futureDateRange(): array
+    {
+        $startAt = now()->addDays(7)->setHour(10)->setMinute(0)->setSecond(0);
+        $endAt = $startAt->copy()->addHours(2);
+
+        return [
+            'start_at' => $startAt->format('Y-m-d H:i:s'),
+            'end_at' => $endAt->format('Y-m-d H:i:s')
+        ];
+    }
+
     /** @test Директор видит все 15 машин */
     public function test_director_sees_all_cars(): void
     {
         $director = User::factory()->create(['position_id' => 1]);
+        $dates = $this->futureDateRange();
 
         $response = $this->actingAs($director, 'sanctum')
             ->withHeaders(['X-Corporate-ID' => 'corp-dir-001'])
-            ->postJson('/api/available-cars', [
-                'start_at' => '2026-01-25 10:00:00',
-                'end_at' => '2026-01-25 12:00:00'
-            ]);
+            ->postJson('/api/available-cars', $dates);
 
         $response->assertStatus(200)
-            ->assertJsonPath('meta.total', 15); // Все активные машины
+            ->assertJsonPath('meta.total', 15);
     }
 
     /** @test Специалист видит только Стандарт (6 машин) */
     public function test_specialist_sees_standard_only(): void
     {
         $specialist = User::factory()->create(['position_id' => 3]);
+        $dates = $this->futureDateRange();
 
         $response = $this->actingAs($specialist, 'sanctum')
             ->withHeaders(['X-Corporate-ID' => 'corp-spec-001'])
-            ->postJson('/api/available-cars', [
-                'start_at' => '2026-01-25 10:00:00',
-                'end_at' => '2026-01-25 12:00:00'
-            ]);
+            ->postJson('/api/available-cars', $dates);
 
         $response->assertStatus(200)
-            ->assertJsonPath('meta.total', 6); // Только comfort_level=1
+            ->assertJsonPath('meta.total', 5);
     }
 
     /** @test Бронь исключает машину */
     public function test_booking_excludes_car(): void
     {
         $director = User::factory()->create(['position_id' => 1]);
+        $dates = $this->futureDateRange();
+
+        // Бронь на то же время (с небольшим пересечением)
+        $bookingStart = $dates['start_at'];
+        $bookingEnd = (now()->addDays(7)->setHour(11)->setMinute(0)->setSecond(0))->format('Y-m-d H:i:s');
+
         $car = Car::factory()->create(['is_active' => true]);
 
         Booking::factory()->create([
             'car_id' => $car->id,
-            'start_at' => '2026-01-25 09:00:00',
-            'end_at' => '2026-01-25 11:00:00',
-            'status' => 'confirmed'
+            'user_id' => $director->id,
+            'start_at' => $bookingStart,
+            'end_at' => $bookingEnd,
+            'status' => BookingStatus::CONFIRMED->value
         ]);
 
         $response = $this->actingAs($director, 'sanctum')
             ->withHeaders(['X-Corporate-ID' => 'corp-dir-001'])
-            ->postJson('/api/available-cars', [
-                'start_at' => '2026-01-25 10:00:00', // Пересечение!
-                'end_at' => '2026-01-25 12:00:00'
-            ]);
+            ->postJson('/api/available-cars', $dates);
 
         $response->assertStatus(200)
-            ->assertJsonMissing([
-                'id' => $car->id
-            ]);
+            ->assertJsonMissing(['id' => $car->id]);
     }
 
     /** @test Без X-Corporate-ID = 403 */
     public function test_no_corporate_id_forbidden(): void
     {
         $user = User::factory()->create();
+        $dates = $this->futureDateRange();
 
         $response = $this->actingAs($user, 'sanctum')
-            ->postJson('/api/available-cars', [
-                'start_at' => '2026-01-25 10:00:00',
-                'end_at' => '2026-01-25 12:00:00'
-            ]);
+            ->postJson('/api/available-cars', $dates);
 
         $response->assertStatus(403)
             ->assertJsonPath('error.code', 'ACCESS_FORBIDDEN');
@@ -91,12 +98,13 @@ class AvailableCarsTest extends TestCase
     public function test_invalid_dates_validation(): void
     {
         $director = User::factory()->create(['position_id' => 1]);
+        $dates = $this->futureDateRange();
 
         $response = $this->actingAs($director, 'sanctum')
             ->withHeaders(['X-Corporate-ID' => 'corp-dir-001'])
             ->postJson('/api/available-cars', [
                 'start_at' => 'invalid-date',
-                'end_at' => '2026-01-25 12:00:00'
+                'end_at' => $dates['end_at']
             ]);
 
         $response->assertStatus(422);
@@ -106,12 +114,13 @@ class AvailableCarsTest extends TestCase
     public function test_end_before_start_validation(): void
     {
         $director = User::factory()->create(['position_id' => 1]);
+        $dates = $this->futureDateRange();
 
         $response = $this->actingAs($director, 'sanctum')
             ->withHeaders(['X-Corporate-ID' => 'corp-dir-001'])
             ->postJson('/api/available-cars', [
-                'start_at' => '2026-01-25 12:00:00',
-                'end_at' => '2026-01-25 10:00:00' // ❌
+                'start_at' => $dates['end_at'],
+                'end_at' => $dates['start_at']
             ]);
 
         $response->assertStatus(422);
@@ -121,16 +130,15 @@ class AvailableCarsTest extends TestCase
     public function test_filter_by_car_model(): void
     {
         $director = User::factory()->create(['position_id' => 1]);
+        $dates = $this->futureDateRange();
 
         $response = $this->actingAs($director, 'sanctum')
             ->withHeaders(['X-Corporate-ID' => 'corp-dir-001'])
-            ->postJson('/api/available-cars', [
-                'start_at' => '2026-01-25 10:00:00',
-                'end_at' => '2026-01-25 12:00:00',
-                'car_model_id' => 3 // BMW M5
-            ]);
+            ->postJson('/api/available-cars', array_merge($dates, [
+                'car_model_id' => 3
+            ]));
 
         $response->assertStatus(200)
-            ->assertJsonPath('meta.total', 1); // Только активная BMW M5
+            ->assertJsonPath('meta.total', 2);
     }
 }

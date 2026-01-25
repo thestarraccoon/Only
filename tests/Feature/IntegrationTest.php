@@ -11,40 +11,49 @@ class IntegrationTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** Helper для будущих дат */
+    private function futureDateRange(): array
+    {
+        $startAt = now()->addDays(7)->setHour(10)->setMinute(0)->setSecond(0);
+        $endAt = $startAt->copy()->addHours(2);
+
+        return [
+            'start_at' => $startAt->format('Y-m-d H:i:s'),
+            'end_at' => $endAt->format('Y-m-d H:i:s')
+        ];
+    }
+
     /** @test Полный путь: register → available-cars */
     public function test_complete_user_journey(): void
     {
-        // 1. Регистрация
+        $dates = $this->futureDateRange();
+
+        $uniqueEmail = 'integration_test_' . uniqid('', true) . '@example.com';
+
         $registerResponse = $this->withHeaders(['X-Corporate-ID' => 'corp-dir-001'])
             ->postJson('/api/auth/register', [
-                'name' => 'Иван Директор',
-                'email' => 'journey@test.com',
+                'name' => 'Интеграционный Директор',
+                'email' => $uniqueEmail,
                 'password' => '123qweasd',
                 'password_confirmation' => '123qweasd'
             ]);
 
         $registerResponse->assertStatus(201);
         $token = $registerResponse->json('data.access_token');
-        $userId = $registerResponse->json('data.user.id');
 
-        // 2. /me
-        $meResponse = $this->withHeaders([
+        $this->withHeaders([
             'Authorization' => "Bearer {$token}",
             'X-Corporate-ID' => 'corp-dir-001'
-        ])->getJson('/api/auth/me');
+        ])
+            ->getJson('/api/auth/me')
+            ->assertStatus(200);
 
-        $meResponse->assertStatus(200);
-
-        // 3. available-cars (15 машин)
-        $carsResponse = $this->withHeaders([
+        $this->withHeaders([
             'Authorization' => "Bearer {$token}",
             'X-Corporate-ID' => 'corp-dir-001'
-        ])->postJson('/api/available-cars', [
-            'start_at' => '2026-01-25 10:00:00',
-            'end_at' => '2026-01-25 12:00:00'
-        ]);
-
-        $carsResponse->assertStatus(200)
+        ])
+            ->postJson('/api/available-cars', $dates)
+            ->assertStatus(200)
             ->assertJsonPath('meta.total', 15);
     }
 }

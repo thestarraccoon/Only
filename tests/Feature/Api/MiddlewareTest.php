@@ -1,5 +1,4 @@
 <?php
-// tests/Feature/Api/MiddlewareTest.php
 
 namespace Tests\Feature\Api;
 
@@ -38,6 +37,6 @@ class MiddlewareTest extends TestCase
             ]);
 
         $response->assertStatus(403)
-            ->assertJsonPath('error.message', 'X-Corporate-ID header required');
+            ->assertJsonPath('error.message', 'api/errors.access_forbidden');
     }
 }

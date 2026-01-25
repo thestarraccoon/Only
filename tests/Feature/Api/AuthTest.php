@@ -101,7 +101,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-            ->assertJsonPath('message', 'Регистрация прошла успешно');
+            ->assertJsonPath('message', __('auth.register_success'));
     }
 
     /** @test Все роли работают */
