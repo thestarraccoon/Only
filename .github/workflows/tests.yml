@@ -9,6 +9,16 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: laravel_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - uses: actions/checkout@v4
 
@@ -16,6 +26,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
+          extensions: mysql
           coverage: xdebug
 
       - name: Cache Composer
@@ -28,13 +39,29 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Copy .env
-        run: cp .env.example .env
+        run: |
+          cat > .env << EOF
+          APP_NAME=Laravel
+          APP_ENV=testing
+          APP_KEY=base64:${{ secrets.APP_KEY || 'somerandom32charslongstringforlaraveltesting==' }}
+          APP_DEBUG=true
+          APP_URL=http://localhost
 
-      - name: Generate key
-        run: php artisan key:generate
+          DB_CONNECTION=mysql
+          DB_HOST=127.0.0.1
+          DB_PORT=3306
+          DB_DATABASE=laravel_test
+          DB_USERNAME=root
+          DB_PASSWORD=root
 
-      - name: Run migrations
-        run: php artisan migrate --seed
+          CACHE_DRIVER=array
+          SESSION_DRIVER=array
+          QUEUE_CONNECTION=sync
+          EOF
+
+      - name: Wait for MySQL
+        run: |
+          docker run --rm --link mysql:mysql -v $(pwd):/app composer/wait:1.6.1 wait-mysql 127.0.0.1:3306 -u root -proot
 
       - name: Run tests with coverage
         run: ./vendor/bin/phpunit --coverage-clover coverage.xml
@@ -43,9 +70,3 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           files: ./coverage.xml
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage.xml
