@@ -38,6 +38,8 @@ class AuthTest extends TestCase
     /** @test Регистрация Специалиста (по умолчанию) */
     public function test_register_specialist_default(): void
     {
+        $this->seed();
+
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Иван',
             'email' => 'specialist@test.com',
@@ -53,6 +55,8 @@ class AuthTest extends TestCase
     /** @test position_id игнорируется */
     public function test_register_ignores_position_id(): void
     {
+        $this->seed();
+
         $response = $this->withHeaders(['X-Corporate-ID' => 'corp-spec-001'])
             ->postJson('/api/auth/register', [
                 'name' => 'Иван',
