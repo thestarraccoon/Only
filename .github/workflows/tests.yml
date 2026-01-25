@@ -2,7 +2,9 @@ name: Tests & Coverage
 
 on:
   push:
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -13,17 +15,15 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: testing
-          MYSQL_USER: root
-          MYSQL_PASSWORD: root
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
         ports:
           - 3306:3306
-        options: >-
-          --health-cmd "mysqladmin ping -h localhost -u root -proot"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
 
     steps:
       - uses: actions/checkout@v4
@@ -35,22 +35,26 @@ jobs:
           extensions: mysql, pdo_mysql
           coverage: xdebug
 
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: vendor
-          key: composer-${{ hashFiles('**/composer.lock') }}
-
       - name: Install dependencies
-        run: composer install --no-progress --no-interaction --optimize-autoloader
-
-      - name: Create .env.testing
         run: |
-          cat > .env.testing << EOF
+          composer install --no-progress --no-interaction --optimize-autoloader
+
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in `seq 1 20`; do
+            nc -z 127.0.0.1 3306 && echo "MySQL is up!" && break
+            echo "Waiting for MySQL... ($i/20)"
+            sleep 1
+          done
+
+      - name: Copy .env
+        run: |
+          cat > .env << EOF
           APP_NAME=Laravel
           APP_ENV=testing
-          APP_KEY=base64:$(head -c 32 /dev/urandom | base64)
+          APP_KEY=base64:$(head -c32 /dev/urandom | base64)
           APP_DEBUG=true
+          APP_TIMEZONE=UTC
           APP_URL=http://localhost
 
           DB_CONNECTION=mysql
@@ -58,56 +62,26 @@ jobs:
           DB_PORT=3306
           DB_DATABASE=testing
           DB_USERNAME=root
-          DB_PASSWORD=root
+          DB_PASSWORD=
 
           CACHE_DRIVER=array
           SESSION_DRIVER=array
           QUEUE_CONNECTION=sync
+          TELESCOPE_ENABLED=false
           EOF
 
-      - name: Wait for database
-        run: |
-          sudo apt-get update -yqq
-          sudo apt-get install -yqq mysql-client
-          for i in {30..0}; do
-            if mysql -h127.0.0.1 -P3306 -uroot -proot -e "SELECT 1" >/dev/null 2>&1; then
-              echo "Database is up - executing ($i)"
-              break
-            fi
-            echo "Waiting for database ($i)..."
-            sleep 1
-          done
-
-      - name: Clear config cache
-        run: php artisan config:clear
-        env:
-          DB_DATABASE: testing
-          DB_USERNAME: root
-          DB_PASSWORD: root
-
-      - name: Generate app key
+      - name: Generate application key
         run: php artisan key:generate --force --no-interaction
-        env:
-          APP_ENV: testing
 
       - name: Run migrations
-        run: php artisan migrate --force
-        env:
-          APP_ENV: testing
+        run: php artisan migrate --force --seed
 
-      - name: Run tests with coverage
-        run: php artisan test --coverage-clover=coverage.xml
-        env:
-          APP_ENV: testing
+      - name: Run tests
+        run: php artisan test --coverage-clover coverage.xml
 
-      - name: Upload coverage to Codecov
+      - name: Upload coverage
+        if: always()
         uses: codecov/codecov-action@v4
         with:
-          file: ./coverage.xml
+          files: ./coverage.xml
           fail_ci_if_error: false
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage.xml
