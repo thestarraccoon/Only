@@ -16,14 +16,4 @@ class ComfortCategory extends Model
         'level',
         'description',
     ];
-
-    public function positions(): BelongsToMany
-    {
-        return $this->belongsToMany(Position::class, 'position_comfort_category');
-    }
-
-    public function carModels(): HasMany
-    {
-        return $this->hasMany(CarModel::class);
-    }
 }

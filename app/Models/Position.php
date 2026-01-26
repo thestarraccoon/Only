@@ -15,11 +15,6 @@ class Position extends Model
         'name',
     ];
 
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class);
-    }
-
     public function comfortCategories(): BelongsToMany
     {
         return $this->belongsToMany(ComfortCategory::class, 'position_comfort_category');
