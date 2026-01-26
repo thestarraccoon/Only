@@ -25,14 +25,4 @@ enum RoleConfig: string
             self::SPECIALIST => 3
         };
     }
-
-    public static function all(): array
-    {
-        return array_column(self::cases(), 'value');
-    }
-
-    public static function default(): self
-    {
-        return self::SPECIALIST;
-    }
 }
