@@ -54,14 +54,22 @@ class AvailableCarsTest extends TestCase
     /** @test Бронь исключает машину */
     public function test_booking_excludes_car(): void
     {
-        $director = User::factory()->create(['position_id' => 1]);
+        $director = User::where('email', 'director@test.com')->first();
+
         $dates = $this->futureDateRange();
 
-        // Бронь на то же время (с небольшим пересечением)
         $bookingStart = $dates['start_at'];
-        $bookingEnd = (now()->addDays(7)->setHour(11)->setMinute(0)->setSecond(0))->format('Y-m-d H:i:s');
+        $bookingEnd = (now()->addDays(7)->setHour(11)->setMinute(0)->setSecond(0))
+            ->format('Y-m-d H:i:s');
 
-        $car = Car::factory()->create(['is_active' => true]);
+        $car = Car::first();
+
+        if (!$car) {
+            $car = Car::factory()
+                ->for(\App\Models\CarModel::factory())
+                ->for(\App\Models\Driver::factory())
+                ->create(['is_active' => true]);
+        }
 
         Booking::factory()->create([
             'car_id' => $car->id,
