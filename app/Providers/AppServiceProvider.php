@@ -14,11 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(RegisterUserService::class, function ($app) {
-            return new RegisterUserService(
-                $app->make(RoleResolverService::class)
-            );
-        });
+        //
     }
 
     /**
