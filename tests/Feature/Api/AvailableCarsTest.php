@@ -54,37 +54,34 @@ class AvailableCarsTest extends TestCase
     /** @test Бронь исключает машину */
     public function test_booking_excludes_car(): void
     {
-        $director = User::where('email', 'director@test.com')->first();
-
         $dates = $this->futureDateRange();
 
         $bookingStart = $dates['start_at'];
         $bookingEnd = (now()->addDays(7)->setHour(11)->setMinute(0)->setSecond(0))
             ->format('Y-m-d H:i:s');
 
+        $director = User::where('position_id', 1)->first();
+        $this->assertNotNull($director);
+
         $car = Car::first();
+        $this->assertNotNull($car);
 
-        if (!$car) {
-            $car = Car::factory()
-                ->for(\App\Models\CarModel::factory())
-                ->for(\App\Models\Driver::factory())
-                ->create(['is_active' => true]);
-        }
-
-        Booking::factory()->create([
+        Booking::create([
             'car_id' => $car->id,
             'user_id' => $director->id,
             'start_at' => $bookingStart,
             'end_at' => $bookingEnd,
-            'status' => BookingStatus::CONFIRMED->value
+            'status' => BookingStatus::CONFIRMED->value,
         ]);
 
         $response = $this->actingAs($director, 'sanctum')
             ->withHeaders(['X-Corporate-ID' => 'corp-dir-001'])
             ->postJson('/api/available-cars', $dates);
 
-        $response->assertStatus(200)
-            ->assertJsonMissing(['id' => $car->id]);
+        $response->assertStatus(200);
+
+        $carIds = collect($response->json('data'))->pluck('id')->toArray();
+        $this->assertNotContains($car->id, $carIds);
     }
 
     /** @test Без X-Corporate-ID = 403 */
