@@ -37,14 +37,4 @@ class Booking extends Model
     {
         return $query->where($timeOverlap);
     }
-
-    public function car(): BelongsTo
-    {
-        return $this->belongsTo(Car::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
 }

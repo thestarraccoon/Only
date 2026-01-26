@@ -22,11 +22,6 @@ class CarModel extends Model
         return $this->belongsTo(ComfortCategory::class);
     }
 
-    public function cars(): HasMany
-    {
-        return $this->hasMany(Car::class);
-    }
-
     public function getFullNameAttribute(): string
     {
         return "{$this->brand} {$this->model}";
