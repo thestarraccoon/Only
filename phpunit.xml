@@ -32,7 +32,6 @@
 
     <php>
         <env name="APP_ENV" value="testing"/>
-        <env name="APP_KEY" value="base64:dGVzdGluZ2tleWZvcmdpdGh1Ymxhc2g3Mw=="/>
         <env name="APP_DEBUG" value="true"/>
         <env name="APP_LOCALE" value="ru"/>
 
