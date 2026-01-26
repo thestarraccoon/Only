@@ -10,13 +10,9 @@ use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
-    use RefreshDatabase;
-
     /** @test Регистрация Директора */
     public function test_register_director(): void
     {
-        $this->seed();
-
         $response = $this->withHeaders(['X-Corporate-ID' => 'corp-dir-001'])
             ->postJson('/api/auth/register', [
                 'name' => 'Иван Директор',

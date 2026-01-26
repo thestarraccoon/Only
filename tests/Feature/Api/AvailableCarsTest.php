@@ -11,8 +11,6 @@ use Tests\TestCase;
 
 class AvailableCarsTest extends TestCase
 {
-    use RefreshDatabase;
-
     /** Helper для будущих дат */
     private function futureDateRange(): array
     {
@@ -56,29 +54,34 @@ class AvailableCarsTest extends TestCase
     /** @test Бронь исключает машину */
     public function test_booking_excludes_car(): void
     {
-        $director = User::factory()->create(['position_id' => 1]);
         $dates = $this->futureDateRange();
 
-        // Бронь на то же время (с небольшим пересечением)
         $bookingStart = $dates['start_at'];
-        $bookingEnd = (now()->addDays(7)->setHour(11)->setMinute(0)->setSecond(0))->format('Y-m-d H:i:s');
+        $bookingEnd = (now()->addDays(7)->setHour(11)->setMinute(0)->setSecond(0))
+            ->format('Y-m-d H:i:s');
 
-        $car = Car::factory()->create(['is_active' => true]);
+        $director = User::where('position_id', 1)->first();
+        $this->assertNotNull($director);
 
-        Booking::factory()->create([
+        $car = Car::first();
+        $this->assertNotNull($car);
+
+        Booking::create([
             'car_id' => $car->id,
             'user_id' => $director->id,
             'start_at' => $bookingStart,
             'end_at' => $bookingEnd,
-            'status' => BookingStatus::CONFIRMED->value
+            'status' => BookingStatus::CONFIRMED->value,
         ]);
 
         $response = $this->actingAs($director, 'sanctum')
             ->withHeaders(['X-Corporate-ID' => 'corp-dir-001'])
             ->postJson('/api/available-cars', $dates);
 
-        $response->assertStatus(200)
-            ->assertJsonMissing(['id' => $car->id]);
+        $response->assertStatus(200);
+
+        $carIds = collect($response->json('data'))->pluck('id')->toArray();
+        $this->assertNotContains($car->id, $carIds);
     }
 
     /** @test Без X-Corporate-ID = 403 */

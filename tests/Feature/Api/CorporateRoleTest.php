@@ -10,8 +10,6 @@ use Tests\TestCase;
 
 class CorporateRoleTest extends TestCase
 {
-    use RefreshDatabase;
-
     /** @test RoleConfig маппинг */
     public function test_role_config_mapping(): void
     {
