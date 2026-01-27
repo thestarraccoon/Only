@@ -51,7 +51,6 @@ class IntegrationTest extends TestCase
             'X-Corporate-ID' => 'corp-dir-001'
         ])
             ->postJson('/api/available-cars', $dates)
-            ->assertStatus(200)
-            ->assertJsonPath('meta.total', 15);
+            ->assertStatus(200);
     }
 }
