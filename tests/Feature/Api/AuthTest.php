@@ -122,4 +122,84 @@ class AuthTest extends TestCase
                 ->assertJsonPath('data.user.roles.0', $role->value);
         }
     }
+
+    public function test_user_can_login_and_get_token(): void
+    {
+        $password = '123qweasd';
+
+        $user = User::factory()->create([
+            'password' => Hash::make($password),
+        ]);
+
+        $this->assertEquals(0, $user->tokens()->count());
+
+        $response = $this->postJson('/api/auth/login', [
+            'email'    => $user->email,
+            'password' => $password,
+        ]);
+
+        $response->assertStatus(200);
+
+        $user->refresh();
+        $this->assertEquals(1, $user->tokens()->count());
+    }
+
+    public function test_login_fails_with_invalid_password(): void
+    {
+        $user = User::factory()->create([
+            'password' => Hash::make('correct-password'),
+        ]);
+
+        $response = $this->postJson('/api/auth/login', [
+            'email'    => $user->email,
+            'password' => 'wrong-password',
+        ]);
+
+        $response
+            ->assertStatus(422);
+    }
+
+    public function test_login_fails_when_user_not_found(): void
+    {
+        $response = $this->postJson('/api/auth/login', [
+            'email'    => 'unknown@example.com',
+            'password' => 'some-password',
+        ]);
+
+        $response
+            ->assertStatus(422);
+    }
+
+    public function test_login_with_revoke_other_tokens_deletes_previous_tokens(): void
+    {
+        $password = '123qweasd';
+
+        $user = User::factory()->create([
+            'password' => Hash::make($password),
+        ]);
+
+        $oldToken1 = $user->createToken('old_1')->plainTextToken;
+        $oldToken2 = $user->createToken('old_2')->plainTextToken;
+
+        $this->assertEquals(2, $user->tokens()->count());
+
+        $response = $this->postJson('/api/auth/login', [
+            'email'               => $user->email,
+            'password'            => $password,
+            'revoke_other_tokens' => true,
+        ]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonPath('message', __('auth.success'));
+
+        $user->refresh();
+
+        $this->assertEquals(1, $user->tokens()->count());
+
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'tokenable_id'   => $user->id,
+            'tokenable_type' => User::class,
+        ]);
+    }
 }
