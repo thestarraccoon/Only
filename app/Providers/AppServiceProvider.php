@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Services\RegisterUserService;
-use App\Services\RoleResolverService;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
