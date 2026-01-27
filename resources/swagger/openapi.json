@@ -1,0 +1,252 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Get Available Corp-Cars API Method",
+        "version": "1.0.0",
+        "description": "Описание методов для регистрации, логина, мой аккаунт, выход из аккаунта, списка доступных машин."
+    },
+    "servers": [
+        {
+            "url": "https://template.postman-echo.com"
+        }
+    ],
+    "paths": {
+        "/api/auth/me": {
+            "get": {
+                "summary": "Me",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ru"
+                    },
+                    {
+                        "name": "X-Corporate-ID",
+                        "in": "header",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": ["corp-spc-001 - обычный спец", "corp-dir-002 - директор", "corp-mgr-003 - менеджер"]
+                        },
+                        "example": "corp-spc-001"
+                    }
+                ],
+                "responses": {},
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": ""
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "summary": "Register",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ru"
+                    }
+                ],
+                "responses": {},
+                "description": "Регистрация",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "name": "Максим",
+                                "email": "swaga@mail.ru",
+                                "password": "123qweasd",
+                                "password_confirmation": "123qweasd"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ru"
+                    }
+                ],
+                "responses": {},
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Логин",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "example": {
+                                "email": "example@mail.ru",
+                                "password": "123qweasd"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "summary": "Logout",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ru"
+                    },
+                    {
+                        "name": "X-Corporate-ID",
+                        "in": "header",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": ["corp-spc-001 - обычный спец", "corp-dir-002 - директор", "corp-mgr-003 - менеджер"]
+                        },
+                        "example": "corp-spc-001"
+                    }
+                ],
+                "responses": {},
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Выход из аккаунта",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                        }
+                    }
+                }
+            }
+        },
+        "/api/available-cars": {
+            "post": {
+                "summary": "Get Available Cars",
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "ru"
+                    },
+                    {
+                        "name": "X-Corporate-ID",
+                        "in": "header",
+                        "required": true,
+                        "deprecated": false,
+                        "schema": {},
+                        "example": "corp-dir-002 - директор, corp-mgr-003 - менеджер, corp-spc-001 - специалист"
+                    }
+                ],
+                "responses": {},
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Получить список доступных машин",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "start_at": {
+                                        "type": "string",
+                                        "format": "datetime",
+                                        "example": "2026-01-27 15:53:00"
+                                    },
+                                    "end_at": {
+                                        "type": "string",
+                                        "format": "datetime",
+                                        "example": "2026-01-27 23:00:00"
+                                    },
+                                    "car_model_id": {
+                                        "type": "integer",
+                                        "example": 611
+                                    },
+                                    "comfort_category_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    }
+                                },
+                                "required": ["start_at", "end_at"]
+                            },
+                            "example": {
+                                "start_at": "2026-01-27 15:53:00",
+                                "end_at": "2026-01-27 23:00:00",
+                                "car_model_id": 611,
+                                "comfort_category_id": 3
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    }
+}

@@ -25,4 +25,15 @@ enum RoleConfig: string
             self::SPECIALIST => 3
         };
     }
+
+    public static function fromPositionId(int $positionId): self
+    {
+        return match($positionId) {
+            1 => self::DIRECTOR,
+            2 => self::MANAGER,
+            3 => self::SPECIALIST,
+            default => self::SPECIALIST
+        };
+    }
+
 }
