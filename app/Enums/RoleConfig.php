@@ -8,12 +8,14 @@ enum RoleConfig: string
     case MANAGER = 'manager';
     case SPECIALIST = 'specialist';
 
-    public static function fromCorporateId(string $corporateId): self
+
+    public static function fromCorporateId(string $corporateId): self|null
     {
         return match (true) {
-            str_starts_with($corporateId, 'corp-dir-') => self::DIRECTOR,
-            str_starts_with($corporateId, 'corp-mgr-') => self::MANAGER,
-            default => self::SPECIALIST
+            str_starts_with($corporateId, 'corp-dir') => self::DIRECTOR,
+            str_starts_with($corporateId, 'corp-mgr') => self::MANAGER,
+            str_starts_with($corporateId, 'corp-scp') => self::SPECIALIST,
+            default => null
         };
     }
 

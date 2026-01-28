@@ -44,7 +44,7 @@ class AvailableCarsTest extends TestCase
         $dates = $this->futureDateRange();
 
         $response = $this->actingAs($specialist, 'sanctum')
-            ->withHeaders(['X-Corporate-ID' => 'corp-spec-001'])
+            ->withHeaders(['X-Corporate-ID' => 'corp-scp-001'])
             ->postJson('/api/available-cars', $dates);
 
         $response->assertStatus(200)

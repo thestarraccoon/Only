@@ -35,7 +35,7 @@ class MiddlewareTest extends TestCase
             ]);
 
         $response->assertStatus(403)
-            ->assertJsonPath('error.message', 'api/errors.access_forbidden');
+            ->assertJsonPath('error.message', __('api/errors.access_forbidden'));
     }
 
     public function test_api_generic_exception_triggers_server_error_method()
