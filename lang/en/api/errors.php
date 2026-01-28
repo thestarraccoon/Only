@@ -8,4 +8,5 @@ return [
     'validation' => 'Validation failed',
     'server_error' => 'Internal server error',
     'access_denied' => 'Access denied for your role',
+    'access_forbidden' =>  'Access forbidden'
 ];

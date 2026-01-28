@@ -34,28 +34,34 @@ class AuthTest extends TestCase
     /** @test Регистрация Специалиста (по умолчанию) */
     public function test_register_specialist_default(): void
     {
-        $response = $this->postJson('/api/auth/register', [
-            'name' => 'Иван',
-            'email' => 'specialist@test.com',
-            'password' => '123qweasd',
-            'password_confirmation' => '123qweasd'
-        ]);
+        $response = $this->withHeaders(['X-Corporate-ID' => 'corp-scp-001'])
+            ->postJson('/api/auth/register', [
+                'name' => 'Иван Спец',
+                'email' => 'spec@test.com',
+                'password' => '123qweasd',
+                'password_confirmation' => '123qweasd'
+            ]);
 
         $response->assertStatus(201)
             ->assertJsonPath('data.user.roles', ['specialist'])
-            ->assertJsonPath('data.user.position.id', 3);
+            ->assertJsonPath('data.user.position.id', 3); // Спец
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'spec@test.com',
+            'position_id' => 3
+        ]);
     }
 
     /** @test position_id игнорируется */
     public function test_register_ignores_position_id(): void
     {
-        $response = $this->withHeaders(['X-Corporate-ID' => 'corp-spec-001'])
+        $response = $this->withHeaders(['X-Corporate-ID' => 'corp-scp-001'])
             ->postJson('/api/auth/register', [
                 'name' => 'Иван',
-                'email' => 'test@test.com',
+                'email' => 'test_ignore_pos@test.com',
                 'password' => '123qweasd',
                 'password_confirmation' => '123qweasd',
-                'position_id' => 1 // Игнорируется!
+                'position_id' => 1
             ]);
 
         $response->assertStatus(201)
@@ -67,14 +73,14 @@ class AuthTest extends TestCase
     {
         User::create([
             'name' => 'Существующий',
-            'email' => 'testauth@test.com',
+            'email' => 'testauthemailexists@test.com',
             'password' => Hash::make('123qweasd'),
             'position_id' => 1
         ]);
 
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Иван',
-            'email' => 'testauth@test.com',
+            'email' => 'testauthemailexists@test.com',
             'password' => '123qweasd',
             'password_confirmation' => '123qweasd'
         ]);
@@ -91,7 +97,7 @@ class AuthTest extends TestCase
             'X-Corporate-ID' => 'corp-dir-001'
         ])->postJson('/api/auth/register', [
             'name' => 'Иван',
-            'email' => 'test@ru.com',
+            'email' => 'testruslocale@ru.com',
             'password' => '123qweasd',
             'password_confirmation' => '123qweasd'
         ]);
@@ -107,7 +113,7 @@ class AuthTest extends TestCase
             $corporateId = match($role) {
                 RoleConfig::DIRECTOR => 'corp-dir-001',
                 RoleConfig::MANAGER => 'corp-mgr-001',
-                RoleConfig::SPECIALIST => 'corp-spec-001'
+                RoleConfig::SPECIALIST => 'corp-scp-001'
             };
 
             $response = $this->withHeaders(['X-Corporate-ID' => $corporateId])

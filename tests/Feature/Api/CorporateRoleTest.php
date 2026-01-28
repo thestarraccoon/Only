@@ -15,7 +15,7 @@ class CorporateRoleTest extends TestCase
     {
         $this->assertEquals('director', RoleConfig::fromCorporateId('corp-dir-001')->value);
         $this->assertEquals('manager', RoleConfig::fromCorporateId('corp-mgr-123')->value);
-        $this->assertEquals('specialist', RoleConfig::fromCorporateId('unknown')->value);
+        $this->assertEquals('specialist', RoleConfig::fromCorporateId('corp-scp-123')->value);
     }
 
     /** @test Все Corporate ID префиксы */
@@ -24,8 +24,8 @@ class CorporateRoleTest extends TestCase
         $tests = [
             'corp-dir-ABC123' => RoleConfig::DIRECTOR,
             'corp-mgr-XYZ789' => RoleConfig::MANAGER,
-            'corp-spec-DEF456' => RoleConfig::SPECIALIST,
-            'invalid-prefix' => RoleConfig::SPECIALIST
+            'corp-scp-DEF456' => RoleConfig::SPECIALIST,
+            'invalid-prefix' => null
         ];
 
         foreach ($tests as $corporateId => $expectedRole) {
