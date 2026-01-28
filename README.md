@@ -22,14 +22,14 @@
 
 - copy .env.example .env
 - composer install
-- php artisan key:generate
-- php artisan storage:link
-- php artisan migrate:fresh --seed
+- `php artisan key:generate`
+- `php artisan storage:link`
+- `php artisan migrate:fresh --seed`
 
-##Создание бронирований
+## Создание бронирований
 
-- php artisan tinker
-- App\Models\Booking::factory()->count(10)->create();
+- `php artisan tinker`
+- `App\Models\Booking::factory()->count(10)->create();`
 
 ## API-документация
 
